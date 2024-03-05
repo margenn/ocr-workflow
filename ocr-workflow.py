@@ -76,7 +76,7 @@ def calcular_vertices(image, limiar, log_level=0):
 	# plota os vertices encontrados na imagem de debug
 	if LOG_LEVEL >= 1:
 		for point in vertices:
-			image_debug = cv.circle(image_debug, (round(point[0]), round(point[1])), round(0.01 * width), GREEN, -1)
+			image_debug = cv.circle(image_debug, (round(point[0]), round(point[1])), round(0.01 * width), GREEN, round(0.003 * width))
 
 	return vertices, image_debug
 
@@ -207,13 +207,13 @@ def criar_pasta(path):
 	return None
 
 
-def crop_bordas(image, percentuais):
+def crop_bordas(image, pixels):
 	'''
 	Remove as bordas de uma imagem
 
 	Args:
 		image: Array NumPy contendo a imagem
-		percentuais: Array com 4 percentuais representando o quanto deve ser removido de cada lado
+		pixels: Array com 4 larguras representando o quanto deve ser removido de cada lado
 			iniciando pelo canto superior, sentido horário
 	Returns:
 		Array NumPy: Imagem com as bordas removidas
@@ -221,10 +221,10 @@ def crop_bordas(image, percentuais):
 
 	altura, largura = image.shape
 
-	corte_superior = int(altura * (percentuais[0]/100))
-	corte_direita = int(largura * (percentuais[1]/100))
-	corte_inferior = int(altura * (percentuais[2]/100))
-	corte_esquerda = int(largura * (percentuais[3]/100))
+	corte_superior = int(pixels[0])
+	corte_direita =  int(pixels[1])
+	corte_inferior = int(pixels[2])
+	corte_esquerda = int(pixels[3])
 
 	return image[corte_superior:-corte_inferior, corte_esquerda:-corte_direita]
 
@@ -420,8 +420,8 @@ if __name__ == "__main__":
 	# INICIO DAS CONFIGURAÇÕES
 	####################################################################################################################
 
-	PASTA_ENTRADA =                             '/home/ma/Documents/githubProjetos/ocr-workflow/sample'
-	LOG_LEVEL = 0                               # 0:Modo PROD, 1:Modo DEV (Ajustes dos parãmetros abaixo)
+	PASTA_ENTRADA =                             os.path.dirname(os.path.realpath(__file__)) + '/sample' # Caminho das imagens
+	LOG_LEVEL = 1                               # 0:Modo PROD, 1:Modo DEV (Ajustes dos parãmetros abaixo)
 	TRATAMENTO_IMAGENS = 1                      # Tratar imagens?
 	LIMITE_IMAGENS = 1                          # Somente as N primerias imagens da pasta serão processadas
 	EXTRACAO_TEXTO = 1                          # Extrair texto?
@@ -431,7 +431,7 @@ if __name__ == "__main__":
 	LIMIAR_BINARIZACAO_DETECCAO_BORDAS = 120    # Limiar de binarizacao inicial, ajustar até que todo o entorno da folha fique preto
 
 	# AJUSTES PARA A SEGUNDA ETAPA (ALINHAMENTO, BINARIZAÇÃO E LIMPEZA DE RUÍDOS)
-	REMOVER_BORDAS = [0.5, 0.5, 0.5, 0.5]       # Percentual de remoção partindo da borda superior, sentido horário (0-100)
+	REMOVER_BORDAS = [10, 10, 10, 10]           # Qtd de pixels remoção partindo da borda superior, sentido horário (0-100)
 	BINARIZACAO_BLUR = 3                        # Suavização da foto original em pixels. Aumente pra reduzir ruídos.
 	BINARIZACAO_BLOCKSIZE = 101                 # Tamanho do bloco para analise de limitar adaptativo.
 	BINARIZACAO_LIMIAR = 15                     # Limiar de brilho para analise de limiar adaptativo. Aumentar para reduzir ruídos.
@@ -445,15 +445,17 @@ if __name__ == "__main__":
 		r'[‘’]': '\''                                                                                 # padroniza aspas simples
 		, r'[“”]': '"'                                                                                # padroniza aspas duplas
 		, r'\u000c': ''                                                                               # remove caractere de controle
-		, r'(?m)(>)( *\S)$': r'\1'                                                                    # "> ,\n" => ">"
-		, r'(>|<|>=|<=|=!) *@\)': r'\1 0)'                                                            # "< @)" => "< 0)"
 		, r'(?i)(\b\w+)( \.|\. )(\w{3,4}\b)': r'\1.\3'                                                # "arquivo. ext" => "arquivo.ext"
 		, r'(?m)^(#[#EH4]{1,6})\b': lambda match: re.sub(r'[^#]', '#', match.group(1))                # ^"#EH" => "###"
-		, r'>(\S{0,5}[@®]\S{0,5})<': lambda match: '>' + re.sub(r'[@®]', '0', match.group(1)) + '<'   # ">1@0<" => ">100<"
 	}
 
 	####################################################################################################################
 	# FIM DAS CONFIGURAÇÕES
+
+	# Verifica a existência do arquivo parametros.py. Caso exista, importa e executa
+	current_path = os.path.dirname(os.path.realpath(__file__))
+	if os.path.exists(current_path + '/parametros.py'):
+		from parametros import *
 
 	# INICIALIZA VARIAVEIS
 	PASTA_SAIDA = PASTA_ENTRADA + '/saida'

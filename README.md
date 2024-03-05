@@ -88,7 +88,7 @@ Isto é feito através da execução sucessiva de ajuste dos parâmetros e execu
 Seguem os parâmetros e valores sugeridos para fotos em 48MP. Os valores podem mudar dependendo do tamanho do caractere e a distância da câmera.
 
 ```python
-REMOVER_BORDAS = [0.5, 0.5, 0.5, 0.5]       # Percentual de remoção das 4 bordas
+REMOVER_BORDAS = [10, 10, 10, 10]           # Remoção das 4 bordas em pixels [sup, dir, inf, esq]
 BINARIZACAO_BLUR = 3                        # Suavização inicial da imagem em pixels.
 BINARIZACAO_BLOCKSIZE = 101                 # Bloco de limitar adaptativo.
 BINARIZACAO_LIMIAR = 20                     # Limiar para analise de limiar adaptativo.
@@ -187,7 +187,7 @@ image_aligned = cv.warpPerspective(image, matrix, (largura, altura))
 
 A imagem retificada ficará com alguma 'sujeira' nas bordas, resultante da curvatura das mesmas na foto original.
 
-Então é necessário remover alguns pixels de cada um dos 4 lados. Isso é feito definindo os percentuais de cada lado. A matriz inicia a partir da borda superior em sentindo horário. Os percentuais devem ser ajustados de acordo com a necessidade.
+Então é necessário remover alguns pixels de cada um dos 4 lados. Isso é feito definindo a quantidade de pixels de cada lado. A matriz inicia a partir da borda superior em sentindo horário. Os valores devem ser ajustados de acordo com que foi mostrado na previa da imagem em modo debug.
 
 ```python
 .....

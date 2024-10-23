@@ -417,7 +417,7 @@ def update_image(image):
 
 if __name__ == "__main__":
 
-	# INICIO DAS CONFIGURAÇÕES
+	# INICIO DAS CONFIGURAÇÕES (esta parte pode ser exportada para o arquivo ./parametros.py)
 	####################################################################################################################
 
 	PASTA_ENTRADA =                             os.path.dirname(os.path.realpath(__file__)) + '/sample' # Caminho das imagens
@@ -439,6 +439,9 @@ if __name__ == "__main__":
 	NOISE_SMALL = 5                             # Objetos ISOLADOS com raio até este, serão removidos da imagem binarizada
 	NOISE_ISOLATION_MIN = 40                    # Distância do ponto em relação aos demais caracteres para que seja considerado isolado.
 	CHAR_RADIUS_MIN = 4                         # Raio nínimo para um objeto ser considerado um caractere
+
+	# AJUSTES PARA A TERCEIRA ETAPA (EXTRAÇÃO DO TEXTO PELO TESSERACT) Ex: '--psm 6'
+	TESSERACT_CONFIG = ''
 
 	# AJUSTES PARA A CORREÇÃO DO TEXTO EXTRAÍDO
 	SUBSTITUICOES = {
@@ -518,10 +521,14 @@ if __name__ == "__main__":
 
 			# Extrai o texto da imagem
 			imagem_pil.mode = '1' # indica que é imagem binária
-			texto_da_imagem = pytesseract.image_to_string(imagem_pil) # , config=tesseract_config
+
+			if (TESSERACT_CONFIG):
+				texto_da_imagem = pytesseract.image_to_string(imagem_pil, config=TESSERACT_CONFIG) # , config=tesseract_config
+			else:
+				texto_da_imagem = pytesseract.image_to_string(imagem_pil) # , config=tesseract_config
 
 			# Inclui o nome da imagem e quebras de linhas adicionais
-			texto_da_imagem = '\n\n\n\n\n\n' + imagem_saida_full_path + '\n\n\n\n' + texto_da_imagem
+			texto_da_imagem = '\n\n\n\n\n\n' + imagem_saida_full_path + '\n\n' + texto_da_imagem
 
 			# Grava conteudo extraido para um arquivo de saida a cada imagem avaliada
 			if (i):
